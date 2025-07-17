@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fashion Choice</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background: #f5f5f5;
+    }
+
+    header {
+      background: #333;
+      color: #fff;
+      padding: 15px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    header h1 {
+      font-size: 24px;
+    }
+
+    header .cart {
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 20px auto;
+      padding: 0 20px;
+    }
+
+    .categories, .sections {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .categories button, .sections button {
+      margin: 5px;
+      padding: 8px 15px;
+      border: none;
+      background: #74ebd5;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .categories button:hover, .sections button:hover {
+      background: #ACB6E5;
+    }
+
+    .products {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 20px;
+    }
+
+    .product {
+      background: #fff;
+      padding: 15px;
+      border-radius: 10px;
+      text-align: center;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+
+    .product img {
+      max-width: 100%;
+      height: 220px;
+      object-fit: cover;
+      border-radius: 10px;
+    }
+
+    .product h3 {
+      margin: 10px 0;
+      font-size: 18px;
+    }
+
+    .product p {
+      margin-bottom: 10px;
+      color: #555;
+    }
+
+    .product button {
+      padding: 8px 15px;
+      background: #74ebd5;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .product button:hover {
+      background: #ACB6E5;
+    }
+
+    .cart-section {
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      margin-top: 20px;
+      display: none;
+    }
+
+    .cart-section h2 {
+      margin-bottom: 10px;
+    }
+
+    .cart-item {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+
+    .total {
+      font-weight: bold;
+      text-align: right;
+      margin-top: 10px;
+    }
+
+    @media(max-width: 600px) {
+      header h1 {
+        font-size: 20px;
+      }
+
+      .product h3 {
+        font-size: 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Fashion Choice</h1>
+    <div class="cart" onclick="toggleCart()">🛒 View Cart (<span id="cart-count">0</span>)</div>
+  </header>
+
+  <div class="container">
+    <div class="categories">
+      <button onclick="filterCategory('All')">All</button>
+      <button onclick="filterCategory('Men')">Men</button>
+      <button onclick="filterCategory('Women')">Women</button>
+      <button onclick="filterCategory('Kids')">Kids</button>
+    </div>
+
+    <div class="sections">
+      <button onclick="filterSection('All')">All Styles</button>
+      <button onclick="filterSection('Indian')">Indian</button>
+      <button onclick="filterSection('Western')">Western</button>
+      <button onclick="filterSection('Indo-Western')">Indo-Western</button>
+    </div>
+
+    <div class="products" id="product-list">
+      <!-- Products will be injected here -->
+    </div>
+
+    <div class="cart-section" id="cart-section">
+      <h2>Your Cart</h2>
+      <div id="cart-items"></div>
+      <div class="total">Total: ₹<span id="cart-total">0</span></div>
+    </div>
+  </div>
+
+  <script>
+    const products = [
+      { id: 1, name: "Men's Kurta", price: 1500, category: "Men", section: "Indian", image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQXJs4BpiyNAYPGKQiXRaiaGrizJHBpNxZlJQ&s" },
+      { id: 2, name: "Unisex White T-Shirt", price: 1200, category: "Men", section: "Western", image: "https://images.pexels.com/photos/2983464/pexels-photo-2983464.jpeg?auto=compress&cs=tinysrgb&w=600" },
+      { id: 3, name: "Women's Saree", price: 2000, category: "Women", section: "Indian", image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSkxVPYKb6SoSyr6EDj5O7Wv7pDHt3pPkdSAQ&s" },
+      { id: 4, name: "Women's Black Dress", price: 1500, category: "Women", section: "Western", image: "https://images.pexels.com/photos/1898555/pexels-photo-1898555.jpeg?auto=compress&cs=tinysrgb&w=600" },
+      { id: 5, name: "Women's Indo-Western Gown", price: 2500, category: "Women", section: "Indo-Western", image: "https://label-s4u.com/cdn/shop/files/566_83711054-4b8a-458a-bb6b-2601d4330840.jpg?v=1747981327" },
+      { id: 6, name: "Kids Lehenga", price: 1200, category: "Kids", section: "Indian", image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ1k66quvNuKI8yLw97BCQ-wld7eKPGpFmNqw&s" },
+      { id: 7, name: "Kids Frock", price: 800, category: "Kids", section: "Western", image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSXpyANMF9N9Q174PdhuSb0ke8YL1FwVvfNfA&s" },
+      { id: 8, name: "Kids Indo-Western Dress", price: 1000, category: "Kids", section: "Indo-Western", image: "https://lagorii.com/cdn/shop/files/peach-satin-dhoti-delight-party-wear-dress-for-girls-lagorii-kids-1.jpg?v=1703714663" },
+    ];
+
+    const cart = [];
+    let currentCategory = 'All';
+    let currentSection = 'All';
+
+    function renderProducts() {
+      const productList = document.getElementById('product-list');
+      productList.innerHTML = '';
+      const filtered = products.filter(p =>
+        (currentCategory === 'All' || p.category === currentCategory) &&
+        (currentSection === 'All' || p.section === currentSection)
+      );
+
+      filtered.forEach(product => {
+        const div = document.createElement('div');
+        div.className = 'product';
+        div.innerHTML = `
+          <img src="${product.image}" alt="${product.name}" />
+          <h3>${product.name}</h3>
+          <p>₹${product.price}</p>
+          <p style="font-size:12px; color:#888;">${product.section} Style</p>
+          <button onclick="addToCart(${product.id})">Add to Cart</button>
+        `;
+        productList.appendChild(div);
+      });
+    }
+
+    function filterCategory(category) {
+      currentCategory = category;
+      renderProducts();
+    }
+
+    function filterSection(section) {
+      currentSection = section;
+      renderProducts();
+    }
+
+    function addToCart(id) {
+      const product = products.find(p => p.id === id);
+      cart.push(product);
+      updateCart();
+    }
+
+    function updateCart() {
+      document.getElementById('cart-count').innerText = cart.length;
+      const cartItems = document.getElementById('cart-items');
+      const cartTotal = document.getElementById('cart-total');
+      cartItems.innerHTML = '';
+      let total = 0;
+      cart.forEach(item => {
+        total += item.price;
+        const div = document.createElement('div');
+        div.className = 'cart-item';
+        div.innerHTML = `<span>${item.name}</span><span>₹${item.price}</span>`;
+        cartItems.appendChild(div);
+      });
+      cartTotal.innerText = total;
+    }
+
+    function toggleCart() {
+      const cartSection = document.getElementById('cart-section');
+      cartSection.style.display = cartSection.style.display === 'none' ? 'block' : 'none';
+    }
+
+    renderProducts();
+  </script>
+</body>
+</html>
